@@ -2,7 +2,7 @@ module Quadrature
 
 using Requires, Reexport,  MonteCarloIntegration, QuadGK, HCubature
 @reexport using DiffEqBase
-using ZygoteRules, Zygote, ReverseDiff, ForwardDiff
+using ZygoteRules, Zygote, ReverseDiff, ForwardDiff , LinearAlgebra
 
 struct QuadGKJL <: DiffEqBase.AbstractQuadratureAlgorithm end
 struct HCubatureJL <: DiffEqBase.AbstractQuadratureAlgorithm end
