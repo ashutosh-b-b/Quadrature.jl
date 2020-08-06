@@ -39,6 +39,18 @@ function scale_x!(_x,ub,lb,x)
     _x
 end
 
+function transform_inf(t , p , f)
+  v(t) = t ./ (1 .- t.^2)
+  j = det(ForwardDiff.jacobian(x ->v(x), t))
+  f(v(t)).*(j)
+end
+
+function transform_semiinf(t , p , f)
+  v(t) = a .+ (t ./ (1 .- t))
+  j = det(ForwardDiff.jacobian(x ->v(x), t))
+  f(v(t)).*(j)
+end
+
 function scale_x(ub,lb,x)
     (ub .- lb) .* x .+ lb
 end
@@ -48,8 +60,12 @@ function DiffEqBase.solve(prob::QuadratureProblem,::Nothing,sensealg,lb,ub,p,arg
     if lb isa Number
         __solve(prob,QuadGKJL();reltol=reltol,abstol=abstol,kwargs...)
     elseif length(lb) > 8 && reltol < 1e-4 || abstol < 1e-4
+        if all(lb .== -Inf) && all(ub .== Inf)
+            prob.f = transform_inf(t , p , prob.f)
         __solve(prob,VEGAS();reltol=reltol,abstol=abstol,kwargs...)
     else
+        if all(lb .== -Inf) && all(ub .== Inf)
+            prob.f = transform_inf(t , p , prob.f)
         __solve(prob,HCubatureJL();reltol=reltol,abstol=abstol,kwargs...)
     end
 end
