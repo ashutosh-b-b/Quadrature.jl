@@ -57,15 +57,12 @@ end
 
 function DiffEqBase.solve(prob::QuadratureProblem,::Nothing,sensealg,lb,ub,p,args...;
                           reltol = 1e-8, abstol = 1e-8, kwargs...)
+
     if lb isa Number
         __solve(prob,QuadGKJL();reltol=reltol,abstol=abstol,kwargs...)
     elseif length(lb) > 8 && reltol < 1e-4 || abstol < 1e-4
-        if all(lb .== -Inf) && all(ub .== Inf)
-            prob.f = transform_inf(t , p , prob.f)
         __solve(prob,VEGAS();reltol=reltol,abstol=abstol,kwargs...)
     else
-        if all(lb .== -Inf) && all(ub .== Inf)
-            prob.f = transform_inf(t , p , prob.f)
         __solve(prob,HCubatureJL();reltol=reltol,abstol=abstol,kwargs...)
     end
 end
@@ -73,6 +70,7 @@ end
 function DiffEqBase.solve(prob::QuadratureProblem,
                             alg::DiffEqBase.AbstractQuadratureAlgorithm,
                             args...; sensealg = ReCallVJP(ZygoteVJP()), kwargs...)
+
   __solvebp(prob,alg,sensealg,prob.lb,prob.ub,prob.p,args...;kwargs...)
 end
 
@@ -83,6 +81,7 @@ function __solvebp_call(prob::QuadratureProblem,::QuadGKJL,sensealg,lb,ub,p,args
                           reltol = 1e-8, abstol = 1e-8,
                           maxiters = typemax(Int),
                           kwargs...)
+
     if isinplace(prob) || lb isa AbstractArray || ub isa AbstractArray
         error("QuadGKJL only accepts one-dimensional quadrature problems.")
     end
@@ -100,6 +99,7 @@ function __solvebp_call(prob::QuadratureProblem,::HCubatureJL,sensealg,lb,ub,p,a
                           reltol = 1e-8, abstol = 1e-8,
                           maxiters = typemax(Int),
                           kwargs...)
+    
     p = p
 
     if isinplace(prob)
